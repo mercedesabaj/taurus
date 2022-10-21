@@ -1,0 +1,38 @@
+execution: 
+- concurrency: 5
+  executor: jmeter
+  ramp-up: 120s
+  hold-for: 1m
+  iterations: 1
+  scenario: two_units_opencart
+  
+scenarios:
+  two_units_opencart:
+    variables: 
+      product_id: 40
+      quantity: 2
+    requests:
+      - url: http://opencart.abstracta.us/
+        method: GET
+        label: Load page
+        assert:
+          - contains:
+            - 0 item(s) - $0.00
+            subject: body
+            regexp: false
+      - url: http://opencart.abstracta.us/index.php?route=checkout/cart/add
+        method: POST
+        label: Add two Iphone units to cart
+        body:
+          product_id: ${product_id}
+          quantity: ${quantity}
+        assert:
+          - contains:
+            - ${quantity} item(s) - $246.40
+            subject: body
+            regexp: false
+
+reporting:
+  - module: passfail
+    criteria: 
+      - fail>3% 
